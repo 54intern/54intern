@@ -1,0 +1,32 @@
+<?php
+
+include_once('intern_job.features.inc');
+
+/**
+ * Implementation of hook_og_features_registry()
+ */
+function intern_job_og_features_registry() {
+  $registry = array();
+  
+  // Feature: commons_blog
+  $feature = new stdClass;
+  $feature->id = 'intern_job';
+  $feature->name = t('Jobs');
+  $feature->description = t('Enable your group members to create job entries relevant to your group.');
+  $feature->components = array(
+    'views' => array(
+      'group_tab_jobs',
+    ),
+    'node' => array(
+      'job',
+    ),
+    'context' => array(
+      'group-home-jobs',
+      'group-tab-jobs',
+      'group-job-node',
+    ),
+  );
+  $registry[$feature->id] = $feature;
+  
+  return $registry;
+}

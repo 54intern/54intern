@@ -1,0 +1,14 @@
+; $Id: og_limit.info,v 1.1.2.1 2010/01/29 14:00:38 yorirou Exp $
+
+name = Organic groups limit!
+description = "Allows the group owners to set a join limit on the group"
+dependecies[] = og
+core = 6.x
+package = "Organic groups"
+dependencies[] = og
+; Information added by drupal.org packaging script on January 1, 1970 - 00:00
+version = "6.x-1.0"
+core = "6.x"
+project = "og_limit"
+datestamp = "1297602289"
+

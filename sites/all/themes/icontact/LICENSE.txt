@@ -1,0 +1,57 @@
+Terms of Service
+Saturday, 23 May 2009 01:35 antsin.com
+
+You should carefully read the following Terms and Conditions. Your purchase or use of Antsin.com products or services implies that you have read and accepted these Terms and Conditions.
+
+License
+Antsin grants you non-exclusive limited license to use the web themes and other products sold through our web site by independent content providers (the "products") in accordance with these Terms and Conditions (the "license").
+
+Limited Usage Granted
+You have the right to use the Antsin themes on as many concurrent sites as your entitlements provide for. You may use each individual product on a single website only, belonging to either you or your client. You must purchase a Domain License in order to make another project with the same design.
+
+Antsin.com hereby grants to you, and you accept, a non-exclusive, non-transferable license to install, copy, use and modify the THEME only as authorized below.
+
+    * Single Website License: This license allows you to use the theme for ONE Internet/Intranet website/domain ONLY. It gives you access to all future updates and new versions of this theme will be free of charge for existing customers that purchased the theme.
+    * Multiple Websites License: This license allows you to use the theme for multiple (up to 3) Internet/Intranet website/domain. It gives you access to all future updates and new versions of this theme will be free of charge for existing customers that purchased the theme. 
+
+Modifications
+You are authorized to make any necessary modification(s) to our products to fit your purposes. You may not however redistribute or release modifications as GPL or otherwise. You are not permitted to change or remove the copyright information in the header of any descriptor file. You are however allowed to delete our credit links from the footer or any other visible place (on the front-end) in the theme. No use of our trademarks is granted under this Agreement. Porting to other platforms and content management systems and redistributing as GPL or otherwise is also strictly prohibited. Please contact us if you have any requirements that are not covered by these terms.
+
+Unauthorized use
+You may not place any of our products, modified or unmodified, on a diskette, CD, website or any other medium and offer them for re-distribution or re-sale of any kind without prior written consent from Antsin. Please contact us if you require any more clarification.
+
+Updates
+All themes are always designed for the latest version of the software they are designed for, but we can give no guarantee, that older themes will run with future versions of Drupal. We are however committed to doing our best to make all the themes compatible with future releases of Drupal.
+
+Delivery
+After we have succesfully received your payment, your Drupal theme or individual theme information will be emailed to the email adress you provided. This may take up to 1 hour but usually happens within minutes. If you do not receive an email after this time period, contact us through this website. Upon logging in with the provided credentials, you will have instant access to our support forum.
+
+Assignability
+You may not sub-license, assign, or transfer this license to anyone else without prior written consent from Antsin.
+
+Ownership
+You may not claim intellectual or exclusive ownership to any of our products, modified or unmodified. All products are property of Antsin.com. Our products are provided ¡°as is¡± without warranty of any kind, either expressed or implied. In no event shall our juridical person be liable for any damages including, but not limited to, direct, indirect, special, incidental or consequential damages or other losses arising out of the use of or inability to use our products.
+
+Use of Content
+You acknowledge that the site contains or may contain material (collectively the ¡°Content¡±) which is protected by copyright, trademark or other proprietary rights; therefore, you are only permitted to use the material as expressly authorized by Antsin. You may not transfer or sell, reproduce, create derivative works from, distribute, or in any way exploit any of the Content, in whole or in part, except with an expressly permitted Agreement from the developer.
+
+Refund Policy
+Since Antsin is offering non-tangible irrevocable, digital goods we do not issue refunds after the subscription or individual theme purchase is made, which you are responsible for understanding upon registering at our site.
+
+Support
+Antsin offers these themes and designs ¡®as is¡¯, with no implied meaning that they will function exactly as you wish or with all 3rd party components and modules. Further, we offer no support via email or otherwise for installation, customization, administration, etc.
+
+Support Forum Policy
+A private members-only forum is available to our members. Antsin does not commit to monitor these forums, but we reserve the right to respond and answer questions. You acknowledge by your use of the themes that it is at your sole risk, and that you assume full responsibility for all costs associated with all necessary servicing or repairs of any equipment you use in connection with the themes.
+
+Price Changes
+Antsin reserves the right at any time and from time to time to modify or discontinue, temporarily or permanently, a subscription (or any part thereof) with or without notice. Prices of all subscriptions and products are subject to change upon 30 days notice from us. Such notice may be provided at any time by posting the changes to the Antsin website.
+
+Warranty
+Antsin does not warrant or guarantee these themes in any manner. We cannot guarantee they will function with all 3rd party modules as there is currently no certification process for such components. Browser compatibility should be tested against the demonstration themes on the demo server. Please ensure that the browsers you use will work with the themes as we can not guarantee that Antsin themes will work with all browser combinations. Nothing in this section should be construed as excluding or limiting any warranty beyond what is permissible under applicable law.
+
+You agree to indemnify and hold Antsin harmless from any claim or demand, including reasonable attorneys¡¯ fees, made by any third party due to or arising out of your use of the themes or this website.
+
+Antsin reserves the right to change the Terms and Conditions from time to time. Further, Antsin reserves the right to modify or discontinue any portion of the membership. Antsin shall not be liable to you or any third party should Antsin exercise its right to modify, suspend, limit or discontinue any feature of the membership.
+
+If any provision of the Terms and Conditions are held by a court of competent jurisdiction to be contrary to law, then such provision(s) shall be construed, as nearly as possible, to reflect the intentions of the parties with the other provisions remaining in full force and effect. 

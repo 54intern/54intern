@@ -1,0 +1,5 @@
+<?php
+function tagtool_install(){
+  db_query("UPDATE {system} SET weight = %d WHERE name = '%s'",10,'tagtool');
+  drupal_set_message(t('Module tagtool weight updated.'));
+}

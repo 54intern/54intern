@@ -1,0 +1,32 @@
+<?php
+
+include_once('intern_article.features.inc');
+
+/**
+ * Implementation of hook_og_features_registry()
+ */
+function intern_article_og_features_registry() {
+  $registry = array();
+  
+  // Feature: intern_article
+  $feature = new stdClass;
+  $feature->id = 'intern_article';
+  $feature->name = t('Articles');
+  $feature->description = t('Enable your group members to create article entries relevant to your group.');
+  $feature->components = array(
+    'views' => array(
+      'group_tab_articles',
+    ),
+    'node' => array(
+      'article',
+    ),
+    'context' => array(
+      'group-home-articles',
+      'group-tab-articles',
+      'group-article-node',
+    ),
+  );
+  $registry[$feature->id] = $feature;
+  
+  return $registry;
+}

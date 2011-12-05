@@ -1,0 +1,222 @@
+<?php
+
+// $Id: og_limit.module,v 1.1.2.23 2011/01/13 05:55:35 hosszukalman Exp $
+
+/**
+ * Implements hook_perm().
+ */
+function og_limit_perm() {
+  return array('edit group limit');
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * @param stdClass $node
+ * @param string $op
+ * @param mixed $a3
+ * @param mixed $a4
+ * @return mixed
+ */
+function og_limit_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'alter':
+      break;
+    case 'delete':
+      og_limit_delete_limit($node->nid);
+      break;
+    case 'delete revision':
+      break;
+    case 'load':
+      if (og_is_group_type($node->type)) {
+        $node->og_limit_max_users = og_limit_get_limit($node->nid);
+      }
+      break;
+    case 'prepare':
+      break;
+    case 'prepare translation':
+      break;
+    case 'print':
+      break;
+    case 'rss item':
+      break;
+    case 'search result':
+      break;
+    case 'presave':
+      break;
+    case 'insert':
+    case 'update':
+      $limit = isset($node->og_limit_max_users) ? (int) $node->og_limit_max_users : 0;
+      if ($limit > 0) {
+        og_limit_insert_limit($limit, $node->nid);
+      }
+      else {
+        og_limit_delete_limit($node->nid);
+      }
+      break;
+    case 'update index':
+      break;
+    case 'validate':
+      break;
+    case 'view':
+      if (isset($node->og_limit_max_users) && (int) $node->og_limit_max_users > 0) {
+        $users = og_limit_get_users_number($node->nid);
+        $node->content['og_limit_max_users'] = array(
+          '#value' => theme('og_limit_max_users', $users, ((int) $node->og_limit_max_users)),
+        );
+      }
+      break;
+  }
+}
+
+/**
+ * Implemenetation of hook_form_alter().
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $form_id
+ */
+function og_limit_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'og_confirm_subscribe') {
+    if (!isset($form['#validate']))
+      $form['#validate'] = array();
+    $form['#validate'] [] = 'og_limit_og_confirm_subscribe_validate';
+  }
+
+  if ($form['#id'] == 'node-form' && og_is_group_type($form['type']['#value'])) {
+    $default_limit = '';
+    if (isset($form['nid']['#value'])) {
+      $node = node_load($form['nid']['#value']);
+      if ($node !== FALSE && isset($node->og_limit_max_users) && $node->og_limit_max_users !== NULL && $node->og_limit_max_users > 0) {
+        $default_limit = $node->og_limit_max_users;
+      }
+    }
+    $form['og_limit_max_users'] = user_access('edit group limit') ?
+      array(
+        '#type' => 'textfield',
+        '#title' => 'User limit',
+        '#default_value' => $default_limit,
+        '#description' => t('Limit the maximum number of users in the group. Leave it empty if you don\'t want such a limitation.'),
+        '#element_validate' => array('og_limit_max_user_validate'),
+      ) :
+      array(
+        '#type' => 'value',
+        '#value' => $default_limit,
+      );
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ *
+ * Define the following templates:
+ *  -
+ *
+ * @return Array of defined theme functions
+ *
+ * @see og-limit-max-users.tpl.php
+ */
+function og_limit_theme($existing, $type, $theme, $path) {
+  return array(
+    'og_limit_max_users' => array(
+      'arguments' => array(
+        'users' => NULL,
+        'max_users' => NULL,
+      ),
+      'template' => 'og-limit-max-users',
+      'path' => drupal_get_path('module', 'og_limit') . '/theme',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ *
+ * This tells drupal that there is Views integration file named
+ * @see factory_rss.views.inc
+ */
+function og_limit_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'og_limit') . '/includes/views',
+  );
+}
+
+/**
+ * Extra validator function for og_confirm_subscribe().
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function og_limit_og_confirm_subscribe_validate($form, &$form_state) {
+  $node = node_load((int) $form['gid']['#value']);
+  if ($node === FALSE || $node->og_limit_max_users === NULL)
+    return;
+  $users = db_result(db_query('SELECT COUNT(*) FROM {og_uid} WHERE nid = %d', $node->nid));
+  if ($users !== FALSE && $node->og_limit_max_users <= $users) {
+    form_set_error('', t('This group is full!'));
+  }
+}
+
+/**
+ * Validator function for og_limit_max_users element.
+ *
+ * @param array $element
+ * @param array $form_state
+ *
+ * @see og_limit_form_alter()
+ */
+function og_limit_max_user_validate($element, &$form_state) {
+  if (!empty($element['#value'])) {
+    if (!is_numeric($element['#value'])) {
+      form_error($element, t('@title value must be a number!', array('@title' => $element['#title'])));
+    }
+    elseif ($element['#value'] < 0) {
+      form_error($element, t('@title value must be a positive number!', array('@title' => $element['#title'])));
+    }
+  }
+}
+
+/**
+ * Get the node's user limit.
+ *
+ * @param int $nid
+ * @return mixed NULL or the maxium integer
+ */
+function og_limit_get_limit($nid) {
+  $max = db_result(db_query('SELECT signup_limit FROM {og_limit} WHERE nid = %d', $nid));
+  return ($max === FALSE) ? NULL : $max;
+}
+
+/**
+ * Delete limit from database.
+ *
+ * @param int $nid
+ */
+function og_limit_delete_limit($nid) {
+  db_query('DELETE FROM {og_limit} WHERE nid = %d', $nid);
+}
+
+/**
+ * Insert or update limit in database.
+ *
+ * @param int $limit
+ * @param int $nid 
+ */
+function og_limit_insert_limit($limit, $nid) {
+  db_query('UPDATE {og_limit} SET signup_limit = %d WHERE nid = %d', $limit, $nid);
+
+  if (db_affected_rows() == 0) {
+    db_query('INSERT INTO {og_limit}(nid, signup_limit) VALUES(%d, %d)', $nid, $limit);
+  }
+}
+
+/**
+ * Get joined users number.
+ *
+ * @param int $nid
+ * @return int Number of the joined users.
+ */
+function og_limit_get_users_number($nid) {
+  return (int) db_result(db_query('SELECT COUNT(*) FROM {og_uid} WHERE nid = %d', $nid));
+}

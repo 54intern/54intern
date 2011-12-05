@@ -1,0 +1,10 @@
+name = Locale Cache
+description = Better caching for locale data.
+package = Caching
+core = 6.x
+; Information added by drupal.org packaging script on 2011-06-24
+version = "6.x-1.0"
+core = "6.x"
+project = "locale_cache"
+datestamp = "1308903419"
+

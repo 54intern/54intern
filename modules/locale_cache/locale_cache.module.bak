@@ -1,0 +1,407 @@
+<?php
+
+/**
+ * @file 
+ * Locale Cache module.
+ */
+
+define(LOCALE_CACHE_DEFAULT_CACHE_LENGTH, 500);
+define(LOCALE_CACHE_DEFAULT_HASHING_THRESHOLD, 32);
+
+/**
+ * Provides interface translation services.
+ * 
+ * @param $string
+ *   A string to look up translation for. If omitted, all the
+ *   cached strings will be returned in all languages already
+ *   used on the page.
+ * @param $langcode
+ *   Language code to use for the lookup.
+ * @param $reset
+ *   Set to TRUE to reset the in-memory cache.
+ */
+function locale_cache_fetch($string = NULL, $langcode = NULL, $reset = FALSE) {
+  global $language;
+  static $locale_static, $locale_cached, $use_hash, $debug_mode;
+  if (!isset($debug_mode)) {
+    $debug_mode = variable_get('locale_cache_debug_mode', FALSE);
+    if ($debug_mode) {
+      register_shutdown_function('locale_cache_shutdown');
+    }
+  }
+  
+  if ($debug_mode) {
+    locale_cache_timer_start();
+  }
+  
+  $langcode = isset($langcode) ? $langcode : $language->language;
+  if (!isset($use_hash)) {
+    $use_hash = variable_get('locale_cache_use_hash_id', FALSE);
+  }
+  
+  if ($reset) {
+    // Reset in-memory cache.
+    $locale_static = $locale_cached = NULL;
+  }
+  
+  if (!isset($string)) {
+    if ($debug_mode) {
+      locale_cache_timer_stop();
+    }
+    // Return all cached strings if no string was specified.
+    if ($use_hash) {
+      // Because we don't store source strings in the $locale_cached, to provide
+      // full information about cached strings we would need to fetch them
+      // from database instead of cache.
+      // However, it should be relatively safe to pretend that cached strings are
+      // not fully loaded and return only translations for which we know the source,
+      // i.e. individual strings which were already processed during the request.
+      return $locale_static;
+    }
+    else {
+      // When hash id are disabled, follow the core behavior.
+      return $locale_cached;
+    }
+  }
+  
+  // Store database cached translations in a static var.
+  if (!isset($locale_cached[$langcode])) {
+    // Rebuild locale cache if any of these conditions is met: 
+    // a) rebuild flag was set, and cron rebuild is disabled
+    // b) there's no cache (initial build).
+    if (!variable_get('locale_cache_cron_rebuild', FALSE)) {
+      $flag = cache_get('locale_cache_rebuild_' . $langcode);
+      if ($flag && $flag->data == 1) {
+        $rebuild = TRUE;
+      }
+    }
+    
+    if (!$rebuild) {
+      if ($cache = cache_get('locale_cached:' . $langcode)) {
+        $locale_cached[$langcode] = $cache->data;
+      }
+      else {
+        // Initial cache build.
+        $initial_build = TRUE;
+      }
+    }
+    
+    if ($rebuild || $initial_build) {
+      $locale_cached[$langcode] = locale_cache_rebuild($langcode);
+      if (!$locale_cached[$langcode]) {
+        // Lock acquire failure. Use old cache, if possible.
+        $locale_cached[$langcode] = array();
+        if ($rebuild && $cache = cache_get('locale_cached:' . $langcode)) {
+          $locale_cached[$langcode] = $cache->data;
+        }
+      }
+    }
+  }
+  
+  // Check the caches in the following order:
+  // 1) static cache from strings already processed by this function (if hashing
+  //    is enabled)
+  // 2) static cache with shortened string id
+  // 3) cache backend
+  // 4) database
+  if ($use_hash && isset($locale_static[$langcode][$string])) {
+    if ($debug_mode) {
+      locale_cache_timer_stop();
+    }
+    return ($locale_static[$langcode][$string] === TRUE ? $string : $locale_static[$langcode][$string]);
+  }
+  $string_id = locale_cache_string_id($string);
+  $cache_id = $langcode . ":" . md5($string);
+  if (isset($locale_cached[$langcode][$string_id])) {
+    if ($debug_mode) {
+      locale_cache_timer_stop();
+    }
+    return ($locale_cached[$langcode][$string_id] === TRUE ? $string : $locale_cached[$langcode][$string_id]);
+  }
+  if ($debug_mode) {
+    locale_cache_log("Main cache miss for the string '%string'", array('%string' => $string));
+  }
+  
+  $cache = cache_get($cache_id, 'cache_locale');
+  if ($cache) {
+    $translation = $cache->data;
+  }
+  else {
+    // We do not have this translation cached, so get it from the DB.
+    $query = "SELECT s.lid, t.translation, s.version FROM {locales_source} s 
+              LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = '%s'
+              WHERE s.source = '%s' AND s.textgroup = 'default'";
+    $db_data = db_fetch_object(db_query($query, $langcode, $string));
+    if ($db_data) {
+      // We have the source string at least.
+      // Cache translation string or TRUE if no translation exists.
+      $translation = (empty($db_data->translation) ? TRUE : $db_data->translation);
+
+      if ($db_data->version != VERSION ) {
+        // This is the first use of this string under current Drupal version.
+        // Save version. Saved version is also a string-history information for 
+        // later pruning of the tables.
+        db_query("UPDATE {locales_source} SET version = '%s' WHERE lid = %d", VERSION, $db_data->lid);
+      }
+    }
+    else {
+      // We don't have the source string, cache this as untranslated.
+      db_query("INSERT INTO {locales_source} (location, source, textgroup, version) VALUES ('%s', '%s', 'default', '%s')", request_uri(), $string, VERSION);
+      $translation = TRUE;
+    }
+    // At this point, the translation must be cached either in the main cache,
+    // or in the individual string cache.
+    if (locale_cache_can_use_main_cache($string, $translation)) {
+      _locale_cache_need_cron_rebuild($langcode);
+    }
+    else {
+      cache_set($cache_id, $translation, 'cache_locale');
+    }
+  }
+  // Store translation in both arrays if needed, but with different keys.
+  $locale_cached[$langcode][$string_id] = $translation;
+  if ($use_hash) {
+    $locale_static[$langcode][$string] = $translation;
+  }
+
+  if ($debug_mode) {
+    locale_cache_timer_stop();
+  }
+  return ($translation === TRUE ? $string : $translation);
+}
+
+/**
+ *  Rebuild main locale cache for the language
+ *  
+ * @param $langcode
+ *   Code of the language to rebuild the cache for
+ * 
+ * @return
+ *   Rebuilt cache entry or FALSE on failure
+ */
+function locale_cache_rebuild($langcode) {
+  if (lock_acquire('locale_cache_' . $langcode)) {
+    // Refresh database stored cache of translations for given language.
+    // We only store short strings used in current version, to improve
+    // performance and consume less memory.
+    //
+    // Should we include long untranslated strings in the main cache ?
+    if (variable_get('locale_cache_include_long_untranslated', FALSE)) {
+      $query = "SELECT s.source, t.translation, t.language FROM {locales_source} s
+                LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = '%s'
+                WHERE s.textgroup = 'default' AND s.version = '%s'
+                AND (t.translation IS NULL OR LENGTH(s.source) < %d)";
+    }
+    else {
+      $query = "SELECT s.source, t.translation, t.language FROM {locales_source} s
+                LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = '%s'
+                WHERE s.textgroup = 'default' AND s.version = '%s'
+                AND LENGTH(s.source) < %d";
+    }
+    $result = db_query($query, $langcode, VERSION, variable_get('locale_cache_length', LOCALE_CACHE_DEFAULT_CACHE_LENGTH));
+    while ($data = db_fetch_object($result)) {
+      // Use shorter version as a string id for the main cache entry, if needed.
+      $short_source = locale_cache_string_id($data->source);
+      $locale_cached[$short_source] = (empty($data->translation) ? TRUE : $data->translation);
+    }
+    cache_set('locale_cached:' . $langcode, $locale_cached);
+    cache_set('locale_cache_rebuild_' . $langcode, 0);
+    lock_release('locale_cache_' . $langcode);
+    return $locale_cached;
+  }
+  return FALSE;
+}
+
+/**
+ * Schedule cron rebuilding of main locale cache for the language 
+ * 
+ * @param $langcode
+ *   Code of language to rebuild the cache for
+ */
+function _locale_cache_need_cron_rebuild($langcode) {
+  static $will_rebuild;
+  if (!isset($will_rebuild[$langcode])) {
+    register_shutdown_function('cache_set', 'locale_cache_rebuild_' . $langcode, 1);
+    $will_rebuild[$langcode] = TRUE;
+  }
+}
+
+/**
+ * Check if the translation pair is cacheable in the main cache entry.
+ */
+function locale_cache_can_use_main_cache(&$source, $translation = TRUE) {
+  if (drupal_strlen($source) < variable_get('locale_cache_length', LOCALE_CACHE_DEFAULT_CACHE_LENGTH) ||
+      ($translation === TRUE && variable_get('locale_cache_include_long_untranslated', FALSE))) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Log locale cache debug messages.
+ * 
+ * Supports t() function style placeholders.
+ * 
+ * @param $message
+ *   Log message with placeholders. If message is not provided, returns logged
+ *   messages.
+ * @param $replace
+ *   Array of placeholder replacements
+ */
+function locale_cache_log($message = NULL, $replace = array()) {
+  static $log;
+  if (!isset($log)) {
+    $log = array();
+  }
+  if ($message === NULL) {
+    return $log;
+  }
+  $log[] = array($message, $replace);
+}
+
+/**
+ * Prepares string id for the $locale_cached storage.
+ * 
+ * Allows to save memory and bandwidth for long strings and to save processing 
+ * time for short ones, at the same time.
+ * 
+ * @param string $string
+ *   unprepared cache id
+ */
+function locale_cache_string_id($string) {
+  static $use_hash;
+  if (!isset($use_hash)) {
+    $use_hash = variable_get('locale_cache_use_hash_id', FALSE);
+  }
+  if ($use_hash && drupal_strlen($string) > variable_get('locale_cache_hashing_threshold', LOCALE_CACHE_DEFAULT_HASHING_THRESHOLD)) {
+    return md5($string);
+  }
+  return $string;
+}
+
+/**
+ * Start locale cache timer.
+ */
+function locale_cache_timer_start() {
+  timer_start('locale_cache');
+}
+
+/**
+ * Stop locale cache timer.
+ */
+function locale_cache_timer_stop() {
+  timer_stop('locale_cache');
+}
+
+/**
+ * Read stopped locale cache timer.
+ */
+function locale_cache_timer_read() {
+  global $timers;
+  return $timers['locale_cache']['time'];
+}
+
+
+/**
+ * Implementation of hook_cron().
+ */
+function locale_cache_cron() {
+  // Rebuild locale caches for languages that are enabled and need rebuilding.
+  if (variable_get('locale_cache_cron_rebuild', FALSE)) {
+    $languages = language_list('enabled');
+    $langcodes = array_keys($languages[1]);
+    foreach ($langcodes as $langcode) {
+      $cache = cache_get('locale_cache_rebuild_' . $langcode);
+      if ($cache && $cache->data == 1) {
+        locale_cache_rebuild($langcode);
+      }
+    }
+  }
+}
+
+/**
+ * Register shutdown function.
+ */
+function locale_cache_shutdown() {
+  // Copy Devel behavior to log translations in other shutdown functions too.
+  register_shutdown_function('locale_cache_shutdown_real');
+}
+
+/**
+ * Print locale cache debug information.
+ */
+function locale_cache_shutdown_real() {
+  // Copy some Devel tricks.
+  if (isset($GLOBALS['devel_shutdown']) || isset($GLOBALS['devel_redirecting'])) {
+    return;
+  }
+  // Try not to break non html pages.
+  if (function_exists('drupal_get_headers')) {
+    $headers = drupal_get_headers();
+    $formats = array('xml', 'javascript', 'json', 'plain', 'image', 'application', 'csv', 'x-comma-separated-values');
+    foreach ($formats as $format) {
+      if (strstr($headers, $format)) {
+        return;
+      }
+    }
+  }
+    
+  if (user_access('access devel information')) {
+    $time = locale_cache_timer_read();
+    $log = locale_cache_log();
+    $log[] = array("Spent !time ms while fetching locale data.", array('!time' => $time));
+    print theme('locale_cache_statistics', $log);
+  }
+}
+
+/**
+ * Implementation of hook_flush_caches().
+ */
+function locale_cache_flush_caches() {
+  return array('cache_locale');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function locale_cache_theme() {
+  $items = array();
+  $items['locale_cache_statistics'] = array(
+    'arguments' => array('data' => NULL),
+  );
+  return $items;
+}
+
+/**
+ * Theme locale cache statistics printed at the bottom of the page.
+ * 
+ * Applies same placeholder filtering as t() function without translating.
+ */
+function theme_locale_cache_statistics($log) {
+  $messages = array();
+  foreach ($log as $item) {
+    list($message, $args) = $item;
+    $message = check_plain($message);
+    // Transform arguments before inserting them.
+    foreach ($args as $key => $value) {
+      switch ($key[0]) {
+        case '@':
+          // Escaped only.
+          $args[$key] = check_plain($value);
+          break;
+
+        case '%':
+        default:
+          // Escaped and placeholder.
+          $args[$key] = theme('placeholder', $value);
+          break;
+
+        case '!':
+          // Pass-through.
+      }
+    }
+    $messages[] = strtr($message, $args);
+  }
+  return '<div class="locale-cache-statistics">' . theme('item_list', $messages) . '</div>';
+}
+

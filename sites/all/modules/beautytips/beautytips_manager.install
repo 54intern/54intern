@@ -1,0 +1,100 @@
+<?php
+
+/**
+ * Implementation of hook_schema().
+ */
+function beautytips_manager_schema() {
+  $schema = array();
+  $schema['beautytips_manager'] = array(
+   'description' => t('Store custom defined beautytips.'), 
+    'fields' => array(
+      'bid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => t('The unique id for the custom beautytip.'),
+      ),
+      'element' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The element to which this beautytips will be applied.'),
+      ), 
+      'content_type' => array(
+        'type' => 'varchar',
+        'length' => 64, 
+        'description' => t('What kind of content will be grabbed for the display.'),
+      ),
+      'content' => array(
+        'type' => 'text',
+        'default' => '',
+        'description' => t('The content that will be displayed. Depends on content type.'),
+      ),
+      'trigger_on' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The event that will turn the beautytips on.'),
+      ),
+      'trigger_off' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The event that will turn the beautytips off.'),
+      ),
+      'style' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The style of the beautytip.'),
+      ),
+      'shrink' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'decription' => t('Whether or to shrink to fit.'),
+      ),
+      'positions' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'default' => '',
+        'description' => t('The position order in which this beautytip should display.'),
+      ),
+      'animation_on' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The animation that will occurs when the beautytips turns on.'),
+      ),
+      'animation_off' => array(
+        'type' => 'varchar',
+        'length' => 255, 
+        'description' => t('The animation that will occurs when the beautytips turns off.'),
+      ),
+      'visibility' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => t('Flag to indicate how to show beautytips on pages. (0 = Show on all pages except listed pages, 1 = Show only on listed pages, 2 = Use custom PHP code to determine visibility)'),
+      ),
+      'pages' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => t('Contains a list of paths on which to include/exclude the beautytip, depending on "visibility" setting.'),
+      ),
+    ),
+    'primary key' => array('bid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function beautytips_manager_install() {
+  drupal_install_schema('beautytips_manager');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function beautytips_manager_uninstall() {
+  drupal_uninstall_schema('beautytips_manager');
+}

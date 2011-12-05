@@ -1,0 +1,13 @@
+
+name = BeautyTips Manager
+description = Adds graphical manager for creating custom beautytips.
+package = User interface
+dependencies[] = beautytips
+core = 6.x
+
+; Information added by drupal.org packaging script on 2011-09-02
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "beautytips"
+datestamp = "1314922082"
+

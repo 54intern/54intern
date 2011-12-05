@@ -1,0 +1,15 @@
+name = Faceted Search UI
+description = "User interface for searching and browsing through multiple facets."
+dependencies[] = faceted_search
+dependencies[] = search
+package = Faceted Search
+core = 6.x
+php = 5.1
+
+
+; Information added by drupal.org packaging script on 2011-02-25
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "faceted_search"
+datestamp = "1298619222"
+

@@ -1,0 +1,15 @@
+diff --git locale.module locale.module
+index 092eb48..87622ab 100644
+--- locale.module
++++ locale.module
+@@ -327,6 +327,10 @@ function locale_node_type($op, $info) {
+  *   Set to TRUE to reset the in-memory cache.
+  */
+ function locale($string = NULL, $langcode = NULL, $reset = FALSE) {
++  if (module_exists('locale_cache')) {
++    return locale_cache_fetch($string, $langcode, $reset);
++  }
++  
+   global $language;
+   static $locale_t;
+ 

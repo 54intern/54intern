@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file locale_cache.install
+ * Contains install and update functions for Locale Cache module.
+ */
+
+function locale_cache_install() {
+  drupal_install_schema('locale_cache');
+}
+
+function locale_cache_uninstall() {
+  drupal_uninstall_schema('locale_cache');
+  
+  variable_del('locale_cache_use_hash_id');
+  variable_del('locale_cache_length');
+  variable_del('locale_cache_include_long_untranslated');
+  variable_del('locale_cache_debug_mode');
+  variable_del('locale_cache_hashing_threshold');
+}
+
+function locale_cache_enable() {
+  cache_clear_all('locale_cached:', 'cache', TRUE);
+  cache_clear_all('*', 'cache_locale', TRUE);    
+}
+
+function locale_cache_disable() {
+  cache_clear_all('locale_cached:', 'cache', TRUE);
+  cache_clear_all('*', 'cache_locale', TRUE);  
+}
+
+/**
+ * Implementation of hook_schema
+ */
+function locale_cache_schema() {
+  $schema['cache_locale'] = drupal_get_schema_unprocessed('system', 'cache');
+  return $schema; 
+}

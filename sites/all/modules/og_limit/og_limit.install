@@ -1,0 +1,47 @@
+<?php
+// $Id: og_limit.install,v 1.1.2.1 2010/12/30 13:20:30 hosszukalman Exp $
+/**
+ * @file
+ * 
+ */
+
+/**
+ * Implementation of hook_schema().
+ *
+ * @return array
+ */
+function og_limit_schema() {
+  $schema = array();
+
+  $schema['og_limit'] = array(
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsinged' => TRUE,
+        'not null' => TRUE,
+      ),
+      'signup_limit' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function og_limit_install() {
+  drupal_install_schema('og_limit');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function og_limit_uninstall() {
+  drupal_uninstall_schema('og_limit');
+}

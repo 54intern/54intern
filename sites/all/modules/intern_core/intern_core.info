@@ -1,0 +1,11 @@
+; $Id: dul.info,v 1.1.2.1 2009/02/05 14:50:32 kiam Exp $
+name = Intern Core
+description = Intern core functions for websit customization.
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-05-21
+version = "6.x-1.0"
+core = "6.x"
+project = "dul"
+datestamp = "1274404208"
+

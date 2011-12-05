@@ -1,0 +1,5 @@
+.buildpath
+.gitignore.swp
+.project
+.settings/
+test.php

@@ -1,0 +1,126 @@
+/* $Id$ */
+
+/*
++----------------------------------------------------------------+
+|   Contact for Dupal 6.x - Version 1.0                          |
+|   Copyright (C) 2010 Antsin.com All Rights Reserved.           |
+|   @license - Copyrighted Commercial Software                   |
+|----------------------------------------------------------------|
+|   Theme Name: Contact                                          |
+|   Description: Contact by Antsin                               |
+|   Author: Antsin.com                                           |
+|   Date: 10th February 2010                                     |
+|   Website: http://www.antsin.com/                              |
+|----------------------------------------------------------------+
+|   This file may not be redistributed in whole or               |
+|   significant part.                                            |
++----------------------------------------------------------------+
+*/  
+
+/** body **/
+#page, #header, #navbar, #showcase, #main, #footer, #closure {
+  width: 100%
+  clear: both;
+}
+
+#header-inner, #navbar-inner, #showcase-inner, #main-inner, #footer-inner, #closure-inner { 
+  margin-left: auto;
+  margin-right: auto;
+  width: 960px;
+}
+
+/** main top & footer **/
+#main-top .main_top-1 div.column {
+  float: left;
+  padding: 0 20px;
+  width: 920px;
+}
+
+#main-top .main_top-2 div.column {
+  float: left;
+  padding: 0 20px;
+  width: 440px;
+}
+
+#main-top .main_top-3 div.column {
+  float: left;
+  padding: 0 20px;
+  width: 280px;
+}
+
+#main-top .main_top-4 div.column {
+  float: left;
+  padding: 0 10px;
+  width: 220px;
+}
+
+#footer .footer-1 div.column {
+  float: left;
+  width: 960px;
+}
+
+#footer .footer-2 div.column {
+  float: left;
+  padding-right: 1px;
+  width: 479px;
+}
+
+.footer-3 #footer-one, .footer-3 #footer-two {
+  float: left;
+  padding-right: 1px;
+  width: 269px;
+}
+
+.footer-3 #footer-three, .footer-3 #footer-four {
+  float: left;
+  width: 420px;
+}
+
+#footer .footer-4 div.column {
+  float: left;
+  padding-right: 1px;
+  width: 239px;
+}
+
+/** content **/
+#content, .no-sidebars #content {
+  float: left;
+  width: 960px;
+  margin-left: 0px;
+  margin-right: -960px; 
+  padding: 0; 
+}
+
+.sidebar-left #content, .sidebar-right #content {
+  width: 740px;
+  margin-left: 220px; 
+  margin-right: -960px;
+}
+
+.two-sidebars #content {
+  width: 520px;
+  margin-left: 440px; 
+  margin-right: -960px;
+}
+
+/** sidebar left & right **/
+.sidebar-left #sidebar-left, .sidebar-right #sidebar-right {
+  float: left;
+  width: 200px;
+  margin-left: 0;
+  margin-right: -200px; 
+}
+
+.two-sidebars #sidebar-left {
+  float: left;
+  width: 200px;
+  margin-left: 0;
+  margin-right: -200px; 
+}
+
+.two-sidebars #sidebar-right {
+  float: left;
+  width: 200px;
+  margin-left: 220px; 
+  margin-right: -420px; 
+}

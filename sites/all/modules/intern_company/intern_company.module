@@ -1,0 +1,3 @@
+<?php
+
+include_once('intern_company.features.inc');

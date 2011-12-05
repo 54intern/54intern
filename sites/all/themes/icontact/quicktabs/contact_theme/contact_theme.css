@@ -1,0 +1,63 @@
+/* $Id$ */
+
+/*
++----------------------------------------------------------------+
+|   Contact for Dupal 6.x - Version 1.0                          |
+|   Copyright (C) 2010 Antsin.com All Rights Reserved.           |
+|   @license - Copyrighted Commercial Software                   |
+|----------------------------------------------------------------|
+|   Theme Name: Contact                                          |
+|   Description: Contact by Antsin                               |
+|   Author: Antsin.com                                           |
+|   Date: 10th February 2010                                     |
+|   Website: http://www.antsin.com/                              |
+|----------------------------------------------------------------+
+|   This file may not be redistributed in whole or               |
+|   significant part.                                            |
++----------------------------------------------------------------+
+*/
+
+.quicktabs_main.quicktabs-style-contact_theme{
+  clear: both;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme{
+  margin: 0 0 10px 0;
+  padding: 0 0 3px;
+  list-style: none;
+  height: 28px;
+  background:transparent url(images/tab-bar.png) no-repeat right bottom;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li{
+  float: left;
+  margin-right: 1px;
+  padding: 0 0 0 5px;
+  border: none;
+  background: transparent url(images/tab_left.png) no-repeat left -30px;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li a{
+  color: #808080;
+  display: block;
+  margin: 0;
+  padding: 6px 17px 6px 12px;
+  border-width: 0;
+  font-weight: bold;
+  text-decoration: none;
+  background: transparent url(images/tab_right.png) no-repeat right -30px;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li:hover a,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active a,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active a:hover{
+  color: #fff;
+  text-decoration:none;
+  border-width: 0;
+  background:transparent url(images/tab_right.png) no-repeat right 0;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li:hover,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active {
+  background:transparent url(images/tab_left.png) no-repeat left 0;
+}

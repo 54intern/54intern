@@ -1,0 +1,157 @@
+/* $Id$ */
+
+/*
++----------------------------------------------------------------+
+|   Contact for Dupal 6.x - Version 1.0                          |
+|   Copyright (C) 2010 Antsin.com All Rights Reserved.           |
+|   @license - Copyrighted Commercial Software                   |
+|----------------------------------------------------------------|
+|   Theme Name: Contact                                          |
+|   Description: Contact by Antsin                               |
+|   Author: Antsin.com                                           |
+|   Date: 10th February 2010                                     |
+|   Website: http://www.antsin.com/                              |
+|----------------------------------------------------------------+
+|   This file may not be redistributed in whole or               |
+|   significant part.                                            |
++----------------------------------------------------------------+
+*/  
+
+/*==============  STYLE  ====================*/
+body {
+  background-color: #5F7008;
+}
+
+a, #site-slogan {
+  color: #5F7008;
+  text-decoration: none;
+}
+
+#showcase {
+  border-top: 1px solid #A2BF0E;
+  background-color: #73880A;
+}
+
+#main-top-one, #main-top-two, #main-top-three, #main-top-four { 
+  background: url("../images/green/bg_main_top_block.png") no-repeat left top;
+}
+
+#content-top {
+  background: url("../images/green/bg_content_top.png") no-repeat right bottom;
+}
+
+#sidebar-left h2 {
+  background-color: #73880A;
+}
+
+#sidebar-right h2 {
+  background: url("../images/green/bg_header_right.png") no-repeat left bottom;
+}
+
+/** footer & closure **/
+#footer {
+  color: #fff; 
+  border-top: 5px solid #5F7008;
+  background-color: #73880A;
+}
+
+#footer h2 { 
+  padding: 4px 20px;
+  background-color: #5F7008;
+}
+
+#closure {
+  background-color: #5F7008;
+}
+
+/** block **/
+.top {
+  height: 5px;
+  margin: 0 5px;
+  background-color: #73880A;  
+}
+
+.top-left {
+  background: url("../images/green/header_left_corner_left.png") no-repeat left top;  
+}
+
+.top-right {
+  background: url("../images/green/header_left_corner_right.png") no-repeat right top;  
+}
+
+.bottom {
+  height: 5px;
+  margin: 0 5px;
+  background-color: #5F7008;  
+}
+
+.bottom-left {
+  background: url("../images/green/header_right_corner_left.png") no-repeat left bottom;  
+}
+
+.bottom-right {
+  background: url("../images/green/header_right_corner_right.png") no-repeat right bottom;  
+}
+
+/** menu **/
+#navbar {
+  background: url("../images/green/bg_menu.png") repeat-x left top;
+}
+
+#primary a:hover, #primary a.active, #primary li.active-trail a {
+  background: url("../images/green/menu_left.png") no-repeat left top;
+}
+
+#primary a:hover span, #primary a.active span, #primary li.active-trail span {
+  background: url("../images/green/menu_right.png") no-repeat right top;
+}
+
+#primary ul ul li {
+  float: none;
+  padding: 0 20px !important;
+  background: transparent url("../images/green/bg_menu_sub.png") repeat-y left top;
+}
+
+#primary ul ul li.first {
+  padding-top: 15px !important;
+  background: transparent url("../images/green/menu_sub_first.png") no-repeat left top;
+}
+
+#primary ul ul li.last {
+  padding-bottom: 20px !important;
+  border-bottom: none !important;
+  background: transparent url("../images/green/menu_sub_last.png") no-repeat left bottom;
+}
+
+/** read more **/
+.read-more {
+  background: url("../images/green/bg_readmore_left.png") no-repeat left top;  
+}
+
+.read-more a {
+  background: url("../images/green/bg_readmore_right.png") no-repeat right top;  
+}
+
+/** quicktabs **/
+ul.quicktabs_tabs.quicktabs-style-contact_theme {
+  background:transparent url("../images/green/bg_content_top.png") no-repeat right bottom;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li {
+  background: transparent url("../images/green/tab_left.png") no-repeat left -30px;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li a {
+  background: transparent url("../images/green/tab_right.png") no-repeat right -30px;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li:hover a,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active a,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active a:hover {
+  background:transparent url("../images/green/tab_right.png") no-repeat right 0;
+}
+
+ul.quicktabs_tabs.quicktabs-style-contact_theme li:hover,
+ul.quicktabs_tabs.quicktabs-style-contact_theme li.active {
+  background:transparent url("../images/green/tab_left.png") no-repeat left 0;
+}

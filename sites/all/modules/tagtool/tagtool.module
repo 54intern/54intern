@@ -1,0 +1,182 @@
+<?php
+
+function tagtool_theme() {
+  return array(
+    'tag_list' => array(
+      'arguments' => array('tags' => NULL, 'vid' => FALSE),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu
+ */
+function tagtool_menu(){
+  $items['admin/settings/tagtool'] = array(
+    'title' => 'Tag tool',
+    'description' => 'Settings for quick add tag tool.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tagtool_admin_settings'),
+    'access arguments' => array('administer taxonomy'),
+  );
+  return $items;
+}
+
+/**
+ * Site configuration form
+ */
+function tagtool_admin_settings(){
+  $message = t('Setup !link first, only free-tagging enabled vocabulary can list below.', array('!link' => l('vocabulary', 'admin/content/taxonomy')));
+  drupal_set_message($message);
+  $form = array();
+
+  $result = db_query('SELECT v.* FROM {vocabulary} v WHERE v.tags =1 ORDER BY v.weight, v.name');
+  while ($voc = db_fetch_object($result)) {
+    $vocabularies[$voc->vid] = $voc;
+    $form = array_merge($form, tagtool_voc_form($voc));
+  }
+  return system_settings_form($form);
+}
+
+/**
+ * single vocabulary configuration form
+ */
+function tagtool_voc_form($voc){
+  $vid = $voc->vid;
+  $source = tagtool_source();
+  foreach($source as $k => $s){
+    $source[$k] = t($s);
+  }
+  $form["tagtool_$vid"] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings for %voc', array('%voc' => $voc->name)),
+    '#weight' => $voc->weight,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form["tagtool_$vid"]['tagtool_enabled_'.$vid] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Check to enable this vocabulary'),
+    '#default_value' => variable_get('tagtool_enabled_'.$vid, 0),
+    '#options' => $source,
+  );
+  $form["tagtool_$vid"]['tagtool_source_'.$vid] = array(
+    '#type' => 'radios',
+    '#title' => t('Tag source'),
+    '#default_value' => variable_get('tagtool_source_'.$vid, 0),
+    '#description' => t('Source of tags to list.'),
+    '#options' => $source,
+  );
+  $form["tagtool_$vid"]['tagtool_num_'.$vid] = array(
+    '#type' => 'select',
+    '#title' => t('Numbers of tags to list'),
+    '#default_value' => variable_get('tagtool_num_'.$vid, 10),
+    '#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50, 100)),
+    '#description' => t('This option is enable only when the source is "Last added tags".'),
+  );
+  $form["tagtool_$vid"]['tagtool_custom_'.$vid] = array(
+    '#type' => 'textarea',
+    '#title' => t('Custom tags list'),
+    '#default_value' => variable_get('tagtool_custom_'.$vid, ''),
+    '#description' => t('This option is enable only when the source is "Custom tags".<br>  Tags separated by "," or line. Mark "#" when the word is not tag.'),
+  );
+  return $form;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function tagtool_form_alter(&$form, $form_state, $form_id) {
+  $node_type = (isset($form['type']) && isset($form['type']['#value'])) ? $form['type']['#value'] : $form['old_type']['#value'];
+  
+  if(isset($form['taxonomy']['tags'])) {
+    $tags = &$form['taxonomy']['tags'];
+    if(is_array($tags)){
+      foreach(array_keys($tags) as $vid){
+        if(variable_get('tagtool_enabled_'.$vid, 0)){
+          $source = variable_get('tagtool_source_'.$vid, '');
+          $vids[$vid] = $source;
+        }
+      }
+    }
+    if(!empty($vids)){
+      drupal_add_js(drupal_get_path('module','tagtool')."/tagtool.js");
+      drupal_add_css(drupal_get_path('module','tagtool')."/tagtool.css");
+      foreach($vids as $vid => $source){
+        $tag = tagtool_get_tags($source, $vid, $node_type);
+        $tag_list[$vid] = tagtool_get_tags($source, $vid, $node_type);
+      }
+      drupal_add_js(array('tagtool'=> $tag_list), 'setting');
+    }
+  }
+  
+}
+
+/**
+ * Implementation of hook_taxonomy().
+ */
+function tagtool_taxonomy($op, $type, $obj = NULL) {
+  if($type == 'vocabulary'){
+    $vid = $obj['vid'];
+    switch($op){
+      case 'update':
+        variable_set('tagtool_source_'.$vid, $obj['tagtool_source_'.$vid]);
+        variable_set('tagtool_custom_'.$vid, $obj['tagtool_custom_'.$vid]);
+        variable_set('tagtool_num_'.$vid, $obj['tagtool_num_'.$vid]);
+        break;
+    }
+  }
+}
+
+
+function tagtool_get_tags($op, $vid, $node_type){
+  $source = tagtool_source();
+  $op = $source[$op];
+  $num_tags = variable_get('tagtool_num_'.$vid, '');
+  switch($op){
+    case 'Last added tags':
+      $tags = array();
+      $result = db_query_range("SELECT t.name, MAX(n.created) FROM {term_data} t INNER JOIN {term_node} r ON r.tid = t.tid INNER JOIN {node} n ON n.nid = r.nid WHERE t.vid = %d GROUP BY r.tid ORDER BY MAX(n.created) DESC", $vid, 0, $num_tags);
+      while($t = db_fetch_object($result)){
+        $tags[] = $t->name;
+      }
+      return $tags;
+    case 'Custom tags':
+      if($custom = variable_get('tagtool_custom_'.$vid, '')){
+        $custom = str_replace("\n", '', $custom);
+        $tokens = preg_split('/[,\s]+/', $custom, -1, PREG_SPLIT_NO_EMPTY);
+        $tags = array();
+        foreach($tokens as $t){
+          if($t[0] == '#'){
+            $tags[] = '<br><strong>'.str_replace('#', '', $t).'</strong>';
+          }
+          else{
+            $tags[] = $t;
+          }
+        }
+        return $tags;
+      }
+      break;
+    case 'All tags':
+      $tags = array();
+      $result = db_query("SELECT t.name FROM {term_data} t WHERE t.vid = %d ORDER BY t.weight ASC", $vid);
+      $tag_link = array();
+      while($t = db_fetch_object($result)){
+        $tags[] = $t->name;
+      }
+      return $tags;
+      break;
+  }
+}
+
+function tagtool_source(){
+  return array(
+    'Last added tags',
+    'Custom tags',
+    'All tags',
+  );
+}
+
+function theme_tag_list($tags, $vid){
+  return '<div id="tagtool-'.$vid.'">'.$tags.'</div>';
+}

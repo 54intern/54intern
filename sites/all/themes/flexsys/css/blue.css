@@ -1,0 +1,170 @@
+/* $Id$ */
+
+/*
++----------------------------------------------------------------+
+|   Flexsys for Dupal 6.x - Version 1.0                          |
+|   Copyright (C) 2009 Antsin.com All Rights Reserved.           |
+|   @license - Copyrighted Commercial Software                   |
+|----------------------------------------------------------------|
+|   Theme Name: Flexsys                                          |
+|   Description: Flexsys by Antsin                               |
+|   Author: Antsin.com                                           |
+|   Date: 7th November 2009                                      |
+|   Website: http://www.antsin.com/                              |
+|----------------------------------------------------------------+
+|   This file may not be redistributed in whole or               |
+|   significant part.                                            |
++----------------------------------------------------------------+
+*/ 
+
+/*==============  STYLE  ====================*/
+/** body **/
+body {
+  background: #eaeaea url("../images/blue/body_bg.png") repeat-x left top;
+}
+
+a {
+  color: #1a7eca;
+  text-decoration: none;
+}
+
+/** navigation **/
+#navbar {
+  background: url("../images/blue/menu_left.png") no-repeat left top;
+}
+
+#navbar-wrapper {
+  background: url("../images/blue/menu_right.png") no-repeat right top;
+}
+
+#navbar-inner {
+  background: url("../images/blue/menu_bg.png") repeat-x left top;
+}
+
+#primary a:hover, #primary a.active, #primary li.active-trail a 
+{
+  background: url("../images/blue/menu_active_left.png") no-repeat left top;
+}
+
+#primary a:hover span, #primary a.active span, #primary li.active-trail span 
+{
+  background: url("../images/blue/menu_active_right.png") no-repeat right top;
+}
+
+#primary ul ul a.active, #primary ul ul a:hover {
+  background: url("../images/blue/menu_sub_bg.png") no-repeat left 6px !important;
+}
+
+#primary ul ul a {
+  color: #3682CD !important;
+}
+
+#secondary {
+  background: url("../images/blue/menu_secondary_left.png") no-repeat left top;
+}
+
+#secondary-wrapper {
+  background: url("../images/blue/menu_secondary_right.png") no-repeat right top;
+}
+
+#secondary-inner {
+  background: url("../images/blue/menu_secondary_bg.png") repeat-x left top;
+}
+
+/** showcase **/
+#showcase h1, #showcase h2 {
+  color: #1a7eca;
+}
+
+ul.slidenav a:hover, ul.slidenav .slidetab-active {
+  background: transparent url("../images/blue/showcase_active.png") no-repeat center top;
+}
+
+ul.slidenav li a {
+  color: #1a7eca !important;
+}
+
+ul.slidenav .subtitle {
+  color: #1a7eca;
+}
+
+/** headline **/
+#headlines {
+  border-bottom: 1px solid #91BDFF;
+}
+
+#headlines-inner {
+  border-bottom: 2px solid #E5EFFE;
+}
+
+/** node **/
+.meta a {  
+  color: #81b832;
+}
+
+/** sidebar & breadcrumb **/
+#sidebar-left h2, #breadcrumb-inner {
+  border-top: 1px solid #C6DDFE;
+  border-bottom: 1px solid #C6DDFE;
+  background-color: #E5EFFE;
+}
+
+#sidebar-left .header-wrapper, #breadcrumb {
+  background: url("../images/blue/block_left_header_left_bg.png") no-repeat left top;    
+}
+
+#sidebar-left .header-wrapper-inner, #breadcrumb-wrapper {
+  background: url("../images/blue/block_left_header_right_bg.png") no-repeat right top;   
+}
+
+#sidebar-right h2 {
+  background: url("../images/blue/block_right_header_bg.png") no-repeat left top;
+}
+
+/** list **/
+.block ul li:hover
+{
+  border-bottom: 1px solid #1a7eca;
+}
+
+/** comments **/
+.comment .author, .comment .author a {
+  color: #81b832;
+}
+
+/** box **/
+.box-top-left {
+  background: url("../images/blue/box_top_left.png") no-repeat left top;  
+}
+
+/** read more **/
+.readmore {
+  background: transparent url("../images/blue/button_right.png") no-repeat scroll top right; 
+}
+
+.readmore span {
+  background: transparent url("../images/blue/button_left.png") no-repeat; 
+} 
+
+a.readmore:hover {
+  color: #C6DDFE;
+  text-decoration: none;
+}
+
+.read-more a, .read-more a:hover {
+  background-color: #81b832; 
+}
+
+/** button **/
+span.button {
+  background: transparent url("../images/blue/button_right.png") no-repeat scroll top right; 
+}
+
+span.button input.form-submit {
+  background: transparent url("../images/blue/button_left.png") no-repeat; 
+} 
+
+/** blog **/
+#blog-date {
+  background: url("../images/blue/blog_date.png") no-repeat 14px top;    
+}

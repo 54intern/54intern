@@ -1,0 +1,67 @@
+<?php
+// $Id: dul.module,v 1.1.2.20 2010/04/18 22:06:06 kiam Exp $
+
+
+/**
+ * @file
+ * Intern core module.
+ */
+
+/**
+ * Implements hook_form_FORM-ID_alter().
+ * hide unusual functions
+ */
+function intern_core_form_user_profile_form_alter(
+		&$form, $form_state) {
+	if (isset ( $form ['_account'] )) {
+		if (isset ( $form ['locale'] )) {
+			if (count ( 
+					element_children ( 
+							$form ['locale'] ) ) > 1) {
+				unset ( 
+						$form ['locale'] ['language'] );
+			} else {
+				unset ( $form ['locale'] );
+			}
+		}
+		if (isset ( $form ['timezone'] )) {
+			unset ( $form ['timezone'] );
+		}
+		if (isset ( $form ['user_terms'] )) {
+			unset ( $form ['user_terms'] );
+		}
+		if (isset ( $form ['contact'] )) {
+			unset ( $form ['contact'] );
+		}
+		if (isset ( $form ['mimemail'] )) {
+			unset ( $form ['mimemail'] );
+		}
+		if (isset ( $form ['digests'] )) {
+			unset ( $form ['digests'] );
+		}
+	}
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function intern_core_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'user_login_block' || $form_id == 'user_login') {
+    
+    $form['enterprise_user_register_links'] = array(
+      '#value' => theme('item_list', array(array(
+        'data' => l('企业用户注册', 'company/register'),
+        'class' => 'enterprise_user_register_links'
+      ))),
+      '#weight' => 1,
+    );    
+  }
+}
+
+/**
+ * Implementation of hook_block()
+ */
+function intern_core_block($op = 'list', $delta = 0, $edit = array()) {
+  module_load_include('inc', 'intern_core', 'intern_core.blocks');
+  return _intern_core_block($op, $delta, $edit);
+}

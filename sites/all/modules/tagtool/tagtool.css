@@ -1,0 +1,12 @@
+.tag-item{
+  padding: 3px;
+  margin-right: 8px;
+  cursor: pointer;
+  display: inline;
+
+}
+span.hover{
+  background-color: #333;
+  color: #fff;
+}
+

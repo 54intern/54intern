@@ -1,0 +1,337 @@
+﻿<?php
+// $Id: template.php 8021 2010-10-19 13:01:34Z sheena $
+
+function commons_origins_commons_core_info_block() {
+  $content = '';
+  
+  $content .= '<div id="acquia-footer-message">';
+
+  $content .= '<a href="http://localhost/54intern" title="' . t('Shixiquan Tech social business software') . '">';
+  $content .= theme('image', 'profiles/drupal_commons/images/commons_droplet.png', t('Shixiquan Tech social business software'), t('Shixiquan Tech social business software'));
+  $content .= '</a>';
+  $content .= '<span>';
+  $content .= '实习圈 @2011-2011 沪ICP证084383号';
+  $content .= '</span>';
+  $content .= '</div>';
+
+  return $content;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function commons_origins_theme() {
+	$items = array();
+	
+	// theme('filter_form') for nicer filter forms.
+  $items['filter_form'] = array('arguments' => array('form' => array()));
+  
+  $items['fieldset'] = array(
+    'arguments' => array('element' => array()),
+    'template' => 'fieldset',
+    'path' => drupal_get_path('theme', 'commons_origins'),
+  );
+
+  // Use a template for form elements
+  $items['form_element'] = array(
+    'arguments' => array('element' => array(), 'value' => NULL),
+    'template' => 'form-item',
+    'path' => drupal_get_path('theme', 'commons_origins'),
+  );
+  
+	$items['node_form'] = array(
+    'arguments' => array('form' => array()),
+    'path' => drupal_get_path('theme', 'commons_origins') ,
+    'template' => 'form-default',
+    'preprocess functions' => array(
+      'commons_origins_preprocess_form_filter',
+      'commons_origins_preprocess_form_buttons',
+      'commons_origins_preprocess_form_node',
+    ),
+  );
+
+  return $items;
+}
+
+/**
+ * Preprocessor for formatting input filter forms.
+ */
+function commons_origins_preprocess_form_filter(&$vars) {
+  _commons_origins_filter_form_alter($vars['form']);
+}
+
+/**
+ * Preprocessor for theme('node_form').
+ */
+function commons_origins_preprocess_form_node(&$vars) {
+  $vars['sidebar'] = isset($vars['sidebar']) ? $vars['sidebar'] : array();
+  // Support nodeformcols if present.
+  if (module_exists('nodeformcols')) {
+    $map = array(
+      'nodeformcols_region_right' => 'sidebar',
+      'nodeformcols_region_footer' => 'footer',
+      'nodeformcols_region_main' => NULL,
+    );
+    foreach ($map as $region => $target) {
+      if (isset($vars['form'][$region])) {
+        if (isset($vars['form'][$region]['#prefix'], $vars['form'][$region]['#suffix'])) {
+          unset($vars['form'][$region]['#prefix']);
+          unset($vars['form'][$region]['#suffix']);
+        }
+        if (isset($vars['form'][$region]['buttons'], $vars['form'][$region]['buttons'])) {
+          $vars['buttons'] = $vars['form'][$region]['buttons'];
+          unset($vars['form'][$region]['buttons']);
+        }
+        if (isset($target)) {
+          $vars[$target] = $vars['form'][$region];
+          unset($vars['form'][$region]);
+        }
+      }
+    }
+  }
+  // Default to showing taxonomy in sidebar if nodeformcols is not present.
+  elseif (isset($vars['form']['taxonomy'])) {
+    $vars['sidebar']['taxonomy'] = $vars['form']['taxonomy'];
+    unset($vars['form']['taxonomy']);
+  }
+}
+
+/**
+ * Implementation of preprocess_form_element().
+ * Take a more sensitive/delineative approach toward theming form elements.
+ */
+function commons_origins_preprocess_form_element(&$vars) {
+  $element = $vars['element'];
+
+  // Main item attributes.
+  $vars['attr'] = array();
+  $vars['attr']['class'] = 'form-item';
+  $vars['attr']['id'] = !empty($element['#id']) ? "{$element['#id']}-wrapper" : NULL;
+  if (!empty($element['#type']) && in_array($element['#type'], array('checkbox', 'radio'))) {
+    $vars['attr']['class'] .= ' form-option';
+  }
+  $vars['description'] = isset($element['#description']) ? $element['#description'] : '';
+
+  // Generate label markup
+  if (!empty($element['#title'])) {
+    $t = get_t();
+    $required_title = $t('This field is required.');
+    $required = !empty($element['#required']) ? "<span class='form-required' title='{$required_title}'>*</span>" : '';
+    $vars['label_title'] = $t('!title: !required', array('!title' => filter_xss_admin($element['#title']), '!required' => $required));
+    $vars['label_attr'] = array();
+    if (!empty($element['#id'])) {
+      $vars['label_attr']['for'] = $element['#id'];
+    }
+
+    // Indicate that this form item is labeled
+    $vars['attr']['class'] .= ' form-item-labeled';
+  }
+  
+  if (!empty($vars['element']['#commons_origins_filter_form'])) {
+    $vars['attr']['class'] .= ' form-item-filter';
+  }
+}
+
+/**
+ * Theme a filter form element
+ */
+function commons_origins__filter_form($form) {
+  if (isset($form['#title'])) {
+    unset($form['#title']);
+  }
+  $select = '';
+  foreach (element_children($form) as $key) {
+    if (isset($form[$key]['#type']) && $form[$key]['#type'] === 'radio') {
+      $select .= drupal_render($form[$key]);
+    }
+  }
+  if (!$select && isset($form['format'])) {
+    $select = drupal_render($form['format']);
+  }
+  $help = theme('filter_tips_more_info');
+  $output = "<div class='filter-options clear-block'>{$select}{$help}</div>";
+  return $output;
+}
+
+/**
+ * Preprocessor for handling form button for most forms.
+ */
+function commons_origins_preprocess_form_buttons(&$vars) {
+  if (empty($vars['buttons']) || !element_children($vars['buttons'])) {
+    if (isset($vars['form']['buttons']) && element_children($vars['form']['buttons'])) {
+      $vars['buttons'] = $vars['form']['buttons'];
+      unset($vars['form']['buttons']);
+    }
+    else {
+      $vars['buttons'] = array();
+      foreach (element_children($vars['form']) as $key) {
+        if (isset($vars['form'][$key]['#type']) && in_array($vars['form'][$key]['#type'], array('submit', 'button'))) {
+          $vars['buttons'][$key] = $vars['form'][$key];
+          unset($vars['form'][$key]);
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * Recurses through forms for input filter fieldsets and alters them.
+ */
+function _commons_origins_filter_form_alter(&$form) {
+  $found = FALSE;
+  foreach (element_children($form) as $id) {
+    // Filter form element found
+    if (
+      isset($form[$id]['#element_validate']) &&
+      is_array($form[$id]['#element_validate']) &&
+      in_array('filter_form_validate', $form[$id]['#element_validate'])
+    ) {
+      $form[$id]['#type'] = 'markup';
+      $form[$id]['#theme'] = 'filter_form';
+      $found = TRUE;
+    }
+    // Formatting guidelines element found
+    elseif ($id == 'format' && !empty($form[$id]['format']['guidelines'])) {
+      $form[$id]['#theme'] = 'filter_form';
+      $found = TRUE;
+    }
+    // Recurse down other elements
+    else {
+      _commons_origins_filter_form_alter($form[$id]);
+    }
+  }
+  // If filter elements found, adjust parent element.
+  if ($found) {
+    foreach (element_children($form) as $element) {
+      $form[$element]['#commons_origins_filter_form'] = TRUE;
+    }
+    $form = array(
+      '#type' => 'item',
+      '#weight' => isset($form['#weight']) ? $form['#weight'] : 0,
+      $form
+    );
+  }
+}
+/**
+ * Preprocessor for theme('fieldset').
+ */
+function commons_origins_preprocess_fieldset(&$vars) {
+  $element = $vars['element'];
+
+  $attr = isset($element['#attributes']) ? $element['#attributes'] : array();
+  $attr['class'] = !empty($attr['class']) ? $attr['class'] : '';
+  $attr['class'] .= ' fieldset';
+  $attr['class'] .= !empty($element['#title']) ? ' titled' : '';
+  $attr['class'] .= !empty($element['#collapsible']) ? ' collapsible' : '';
+  $attr['class'] .= !empty($element['#collapsible']) && !empty($element['#collapsed']) ? ' collapsed' : '';
+  $vars['attr'] = $attr;
+
+  $description = !empty($element['#description']) ? "<div class='description'>{$element['#description']}</div>" : '';
+  $children = !empty($element['#children']) ? $element['#children'] : '';
+  $value = !empty($element['#value']) ? $element['#value'] : '';
+  $vars['content'] = $description . $children . $value;
+  $vars['title'] = !empty($element['#title']) ? $element['#title'] : '';
+  if (!empty($element['#collapsible'])) {
+    $vars['title'] = l(filter_xss_admin($vars['title']), $_GET['q'], array('fragment' => 'fieldset', 'html' => TRUE));
+  }  
+
+  if (!empty($vars['element']['#collapsible'])) {
+    $vars['title'] = "<span class='icon'></span>" . $vars['title'];
+  }
+  $vars['hook'] = 'fieldset';
+}
+
+/**
+ * Helper function for cloning and drupal_render()'ing elements.
+ */
+function commons_origins_render_clone($elements) {
+  static $instance;
+  if (!isset($instance)) {
+    $instance = 1;
+  }
+  foreach (element_children($elements) as $key) {
+    if (isset($elements[$key]['#id'])) {
+      $elements[$key]['#id'] = "{$elements[$key]['#id']}-{$instance}";
+    }
+  }
+  $instance++;
+  return drupal_render($elements);
+}
+
+/**
+ * Override of theme('textfield').
+ */
+function commons_origins_textfield($element) {
+  if ($element['#size'] >= 30 && empty($element['#field_prefix']) && empty($element['#field_suffix'])) {
+    $element['#size'] = '';
+    $element['#attributes']['class'] = isset($element['#attributes']['class']) ? "{$element['#attributes']['class']} fluid" : "fluid";
+  }
+  return theme_textfield($element);
+}
+
+/**
+ * Override of theme('password').
+ */
+function commons_origins_password($element) {
+  if ($element['#size'] >= 30 || $element['#maxlength'] >= 30) {
+    $element['#size'] = '';
+    $element['#attributes']['class'] = isset($element['#attributes']['class']) ? "{$element['#attributes']['class']} fluid" : "fluid";
+  }
+  return theme_password($element);
+}
+
+/**
+ * Override of theme('node_submitted').
+ */
+function commons_origins_node_submitted($node) {
+  return _commons_origins_submitted($node);
+}
+
+/**
+ * Override of theme('comment_submitted').
+ */
+function commons_origins_comment_submitted($comment) {
+  $comment->created = $comment->timestamp;
+  return _commons_origins_submitted($comment);
+}
+
+/**
+ * Helper function to submitted info theming functions.
+ */
+function _commons_origins_submitted($node) {
+  $byline = t('Posted by !username', array('!username' => theme('username', $node)));
+  $date = format_date($node->created, 'small');
+  return "<div class='byline'>{$byline}</div><div class='date'>$date</div>";
+}
+
+/**
+ * Override of theme('filter_tips_more_info').
+ */
+function commons_origins_filter_tips_more_info() {
+  return '<div class="filter-help">'. l(t('Formatting help'), 'filter/tips', array('attributes' => array('target' => '_blank'))) .'</div>';
+}
+
+/**
+ * Theme a filter form element
+ */
+function commons_origins_filter_form($form) {
+  if (isset($form['#title'])) {
+    unset($form['#title']);
+  }
+  $select = '';
+  foreach (element_children($form) as $key) {
+    if (isset($form[$key]['#type']) && $form[$key]['#type'] === 'radio') {
+      $select .= drupal_render($form[$key]);
+    }
+  }
+  if (!$select && isset($form['format'])) {
+    $select = drupal_render($form['format']);
+  }
+  $help = theme('filter_tips_more_info');
+  $output = "<div class='filter-options clear-block'>{$select}{$help}</div>";
+  return $output;
+}
+
+
+
